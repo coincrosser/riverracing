@@ -1,0 +1,3 @@
+import {NextResponse} from "next/server";import {runDiscoveryEngine} from "@/lib/discovery-engine";
+export const maxDuration=300;
+export async function POST(request:Request){if(request.headers.get("authorization")!==`Bearer ${process.env.DISCOVERY_ADMIN_TOKEN}`||!process.env.DISCOVERY_ADMIN_TOKEN)return NextResponse.json({error:"Unauthorized"},{status:401});try{const body=await request.json().catch(()=>({}));const target=typeof body.target==="string"?body.target.slice(0,180):"Louisville metro and the Ohio River corridor to Cairo, Illinois";return NextResponse.json(await runDiscoveryEngine(target))}catch(error){return NextResponse.json({error:error instanceof Error?error.message:"Discovery failed"},{status:500})}}
