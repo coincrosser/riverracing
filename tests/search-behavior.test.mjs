@@ -22,4 +22,5 @@ test("date query restricts range",()=>{const {i,result}=run("Regattas this weeke
 test("synonyms resolve deterministically",()=>{assert.equal(run("crew").i.discipline,"Rowing");assert.equal(run("motorboat").i.discipline,"Powerboat racing");assert.equal(run("SUP").i.discipline,"Stand-up paddleboard racing")});
 test("zero result stays empty",()=>{const {result}=run("Kayak races in Wyoming");assert.equal(result.exact.length+result.nearby.length,0)});
 test("dragon boat near Memphis has anchor and radius",()=>{const {i,result}=run("Dragon boat races near Memphis");assert.deepEqual(i.intent,["DISCIPLINE","LOCATION"]);assert.equal(i.radius,100);assert.equal(result.exact.length,1)});
-
+test("plain discipline plus city intersects without AI",()=>{const {i,result}=run("Sailing Louisville");assert.deepEqual(i.intent,["DISCIPLINE","LOCATION"]);assert.equal(i.usedAI,undefined);assert.deepEqual(result.exact.map(x=>x.event.slug),["sail-ohio"])});
+test("this month is a deterministic calendar range",()=>{const {i,result}=run("Races this month");assert.deepEqual(i.intent,["DATE"]);assert.deepEqual(i.dateRange,{start:"2026-10-01",end:"2026-10-31"});assert.deepEqual(result.exact.map(x=>x.event.slug),["sail-ohio"])});

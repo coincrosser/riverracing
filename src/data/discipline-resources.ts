@@ -5,3 +5,4 @@ export const disciplineResources:DisciplineResource[]=[{id:"brand-esquif-canoes"
 const norm=(value:string)=>value.toLowerCase();
 export function resourcesForEvent(event:RaceEvent){const terms=[...event.sports,...(event.eventTypes||[]),...(event.boatClasses||[])].map(norm);return disciplineResources.filter(resource=>resource.active&&(resource.applicableDisciplines.some(d=>terms.includes(norm(d)))||resource.applicableSubdisciplines.some(d=>terms.some(t=>t.includes(norm(d)))))).sort((a,b)=>b.placementPriority-a.placementPriority)}
 export function getDisciplineResource(id:string){return disciplineResources.find(resource=>resource.active&&resource.id===id)}
+export function resourcesForDiscipline(discipline?:string){if(!discipline)return[];return disciplineResources.filter(resource=>resource.active&&resource.applicableDisciplines.some(item=>norm(item)===norm(discipline))).sort((a,b)=>b.placementPriority-a.placementPriority)}

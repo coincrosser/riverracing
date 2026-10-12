@@ -1,0 +1,3 @@
+import {resourcesForDiscipline} from "@/data/discipline-resources";
+import ExternalLink from "./ExternalLink";
+export default function DisciplineSearchResources({discipline}:{discipline?:string}){const resources=resourcesForDiscipline(discipline);if(!resources.length)return null;return <aside className="discipline-resources search-discipline-resource" aria-label={`Resources for ${discipline}`}>{resources.map(resource=><article key={resource.id}><p>{resource.categoryLabel}</p><div><h2>{resource.brand}</h2><span>{resource.description}</span></div><ExternalLink linkId={resource.id} source="search-discipline-resource" eventSlug={`search:${discipline}`}>Explore Esquif</ExternalLink></article>)}</aside>}

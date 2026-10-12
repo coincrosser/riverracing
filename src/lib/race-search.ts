@@ -53,6 +53,7 @@ const miles=(a:Point,b:Point)=>{const rad=Math.PI/180;const dLat=(b.lat-a.lat)*r
 const cityKey=(city:string)=>clean(city).replace(/\bst\b/g,"saint");
 function eventPoint(event:RaceEvent):Point|undefined{if(event.latitude!=null&&event.longitude!=null)return{lat:event.latitude,lon:event.longitude};const key=cityKey(event.city);const place=places.find(p=>(p.aliases||[]).some(a=>cityKey(a)===key));return place?{lat:place.lat,lon:place.lon}:undefined}
 function weekend(now:Date){const day=now.getUTCDay();const untilSaturday=(6-day+7)%7;const sat=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+untilSaturday));const sun=new Date(sat);sun.setUTCDate(sat.getUTCDate()+1);return{start:sat.toISOString().slice(0,10),end:sun.toISOString().slice(0,10)}}
+function thisMonth(now:Date){const start=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1)),end=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()+1,0));return{start:start.toISOString().slice(0,10),end:end.toISOString().slice(0,10)}}
 
 export function interpretSearch(query:string,radius:RadiusMiles=100,now=new Date()):SearchInterpretation{
  const q=clean(query);const result:SearchInterpretation={query,radius,intent:[]};let matchedPlace:Place|undefined;
@@ -62,9 +63,10 @@ export function interpretSearch(query:string,radius:RadiusMiles=100,now=new Date
  if(!result.location){const state=stateNames.find(([name,abbr])=>q.includes(name)||new RegExp(`(^| )${abbr.toLowerCase()}( |$)`).test(q));if(state){result.location=state[0].replace(/\b\w/g,c=>c.toUpperCase());result.locationKind="state"}}
  const discipline=disciplines.find(([,aliases])=>aliases.some(a=>q.includes(clean(a))));if(discipline)result.discipline=discipline[0];
  if(q.includes("this weekend"))result.dateRange=weekend(now);
+ if(q.includes("this month"))result.dateRange=thisMonth(now);
  if(q.includes("next 7 days")||q.includes("next seven days")){const end=new Date(now);end.setUTCDate(end.getUTCDate()+7);result.dateRange={start:now.toISOString().slice(0,10),end:end.toISOString().slice(0,10)}}
  if(q.includes("next 30 days")||q.includes("next thirty days")){const end=new Date(now);end.setUTCDate(end.getUTCDate()+30);result.dateRange={start:now.toISOString().slice(0,10),end:end.toISOString().slice(0,10)}}
- const consumed=[...(result.location?[clean(result.location),...(waterway?[waterway]:[]),...((matchedPlace?.aliases)||[])]:[]),...(discipline?discipline[1]:[]),"near","on","in","around","race","races","racing","boat","boats","this","weekend","next","7","seven","30","thirty","days"];
+ const consumed=[...(result.location?[clean(result.location),...(waterway?[waterway]:[]),...((matchedPlace?.aliases)||[])]:[]),...(discipline?discipline[1]:[]),"near","on","in","around","race","races","racing","boat","boats","this","weekend","month","next","7","seven","30","thirty","days"];
  let free=` ${q} `;for(const word of consumed.sort((a,b)=>b.length-a.length))free=free.replaceAll(` ${clean(word)} `," ");free=free.trim();if(free)result.freeText=free;
  if(result.discipline)result.intent.push(result.discipline==="Regatta"?"EVENT_TYPE":"DISCIPLINE");
  if(result.locationKind==="waterway")result.intent.push("WATERWAY");else if(result.locationKind==="state")result.intent.push("STATE");else if(result.location)result.intent.push("LOCATION");

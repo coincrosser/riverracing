@@ -25,7 +25,7 @@ test("audience mode prioritizes participant and spectator experiences",()=>{
 test("outbound links are allowlisted, classified, and analytics-ready",()=>{
  assert.match(outbound,/getOutboundLink\(linkId\)/);
  assert.match(outbound,/OUTBOUND_CLICK_WEBHOOK/);
- for(const field of ["event","linkId","type","timestamp","source","audience"])assert.match(outbound,new RegExp(field));
+ for(const field of ["event","linkId","type","timestamp","source","placement","referrerPath","audience"])assert.match(outbound,new RegExp(field));
  assert.match(outbound,/durable:false/);
  assert.doesNotMatch(outbound,/searchParams\.get\("url"\)/);
 });
