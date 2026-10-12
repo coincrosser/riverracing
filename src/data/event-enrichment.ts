@@ -10,6 +10,20 @@ export type EventEnrichment={eventSlug:string;venue:{name:string;address:string;
 const eventSlug="helly-hansen-sailing-world-regatta-series-st-petersburg-2027-st-petersburg";
 const verifiedAt="2026-10-12";
 
+const louisvilleVenue={name:"Louisville Sailing Club",address:"7300 Beechland Beach Road, Prospect, KY 40059",waterway:"Ohio River",latitude:38.3957,longitude:-85.6261,sourceUrl:"https://louisvillesailingclub.com/events"};
+const localResource=(eventSlug:string,kind:"unbridled"|"juniper"):EventResource=>kind==="unbridled"?{
+ id:`${eventSlug}-unbridled-sailing`,eventSlug,name:"Unbridled Sailing",type:"marine_service",description:"Louisville sailing expertise for sails, standing and running rigging, sailing instruction, rig tuning and racing support.",address:"Louisville, Kentucky",latitude:38.2527,longitude:-85.7585,websiteUrl:"https://unbridledsailing.com/",phone:"502-718-2969",amenities:["Sails","Rigging","Sailing instruction","Racing support"],sourceUrl:"https://unbridledsailing.com/history.html",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant"],applicableDisciplines:["Sailing"]
+}:{
+ id:`${eventSlug}-juniper-beach-marina`,eventSlug,name:"Juniper Beach Marina",type:"marina",description:"Prospect marina with a protected launch ramp, dry storage, creek slips and a year-round card-operated fuel dock. Contact the marina directly about current access and availability.",address:"5301 Juniper Beach Road, Prospect, KY 40059",latitude:38.3167,longitude:-85.6503,websiteUrl:"https://www.juniperbeachmarina.com/",phone:"502-586-2628",amenities:["Protected launch ramp","Dry storage","Creek slips","Fuel dock"],sourceUrl:"https://www.juniperbeachmarina.com/",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant"],applicableDisciplines:["Sailing"]
+};
+const lscEnrichment=(eventSlug:string,description:string,officialLabel="Official event page"):EventEnrichment=>({
+ eventSlug,venue:louisvilleVenue,hero:{shortDescription:description,countdownEnabled:true},
+ officialLinks:[{id:`${eventSlug}-official`,type:"official_event",label:officialLabel,url:"https://louisvillesailingclub.com/events",sourceUrl:"https://louisvillesailingclub.com/events",verifiedAt}],
+ resources:[localResource(eventSlug,"unbridled"),localResource(eventSlug,"juniper")],
+ participantNotes:["Louisville Sailing Club controls race entry, launching, boat storage and site access. Confirm arrangements with the club before arrival.","Juniper Beach Marina is an independent free listing, not an official event marina or sponsor; availability is not implied."],
+ spectatorNotes:[],transportationNotes:["The organizer has not published general public spectator access or parking instructions. Do not enter club property without organizer permission."],lastReviewedAt:verifiedAt
+});
+
 export const eventEnrichments:EventEnrichment[]=[{
  eventSlug,
  venue:{name:"St. Petersburg Sailing Center",address:"250 2nd Avenue SE, St. Petersburg, FL 33701",waterway:"Tampa Bay",latitude:27.7694828,longitude:-82.6314411,sourceUrl:"https://www.spyc.org/Waterfront"},
@@ -28,7 +42,18 @@ export const eventEnrichments:EventEnrichment[]=[{
   {id:"swrs-west-marine",eventSlug,name:"West Marine St. Petersburg",type:"marine_supply",description:"Marine-supply store carrying sailing hardware, line, safety equipment and boat-maintenance supplies.",address:"2010 Tyrone Boulevard N, St. Petersburg, FL 33710",latitude:27.7898239,longitude:-82.7250741,websiteUrl:"https://www.westmarine.com/stores/st-petersburg-fl-1289/",phone:"727-342-8001",amenities:["Rigging hardware","Line","Safety equipment","Marine electronics"],sourceUrl:"https://www.westmarine.com/stores/st-petersburg-fl-1289/",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant"],applicableDisciplines:["Sailing"]},
   {id:"swrs-sunrunner",eventSlug,name:"PSTA SunRunner",type:"transportation",description:"Frequent public transit connecting downtown St. Petersburg, Central Avenue and St. Pete Beach.",websiteUrl:"https://psta.net/services/sunrunner/",amenities:["Accessible stations","Downtown service","Beach service"],sourceUrl:"https://psta.net/services/sunrunner/",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant","spectator"]}
  ],lastReviewedAt:verifiedAt
-}];
+},
+ lscEnrichment("pumpkin-regatta-2026","A two-day Sunfish regatta on the Ohio River, with official registration and race documents controlled by Louisville Sailing Club.","Registration & official page"),
+ lscEnrichment("lsc-fall-long-distance-race-2026","A season-ending Ohio River distance race and poker run, followed by awards and dinner at Louisville Sailing Club."),
+ lscEnrichment("lsc-sunfish-fleet-racing-2026","The final scheduled sessions of Louisville Sailing Club’s 2026 one-design Sunfish racing series on the Ohio River."),
+ lscEnrichment("lsc-handicap-fleet-racing-2026","The final scheduled session of Louisville Sailing Club’s 2026 handicap fleet racing series on the Ohio River."),
+ {
+  eventSlug:"great-steamboat-race-2027",venue:{name:"Louisville Wharf at Waterfront Park",address:"401 West River Road, Louisville, KY 40202",waterway:"Ohio River",latitude:38.2598,longitude:-85.7426,sourceUrl:"https://discover.kdf.org/great-steamboat-race/"},
+  hero:{shortDescription:"Louisville’s historic two-hour Ohio River steamboat competition returns during Kentucky Derby Festival week.",countdownEnabled:true},
+  officialLinks:[{id:"great-steamboat-race-2027-official",type:"official_event",label:"Official event page",url:"https://discover.kdf.org/great-steamboat-race/",sourceUrl:"https://discover.kdf.org/great-steamboat-race/",verifiedAt}],
+  resources:[],participantNotes:[],spectatorNotes:["The official event page lists boarding from 4:30–5:30 p.m., departure at 5:45 p.m. and the race start at 6 p.m. Tickets are not yet on sale."],transportationNotes:["Use the official event page for ticketing and race-day access updates. RiverRacing does not infer viewing or parking locations."],lastReviewedAt:verifiedAt
+ }
+];
 
 export function getEventEnrichment(slug:string){return eventEnrichments.find(item=>item.eventSlug===slug)}
 export function getOutboundLink(id:string){for(const enrichment of eventEnrichments){const official=enrichment.officialLinks.find(link=>link.id===id);if(official)return{eventSlug:enrichment.eventSlug,type:official.type,url:official.url};const resource=enrichment.resources.find(item=>item.id===id);if(resource)return{eventSlug:enrichment.eventSlug,type:resource.type,url:resource.bookingUrl||resource.websiteUrl}}}
