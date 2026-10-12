@@ -1,4 +1,5 @@
 import {upcomingNational} from "./upcoming-national";
+import {rowingNational} from "./rowing-national";
 
 export type EventStatus = "Confirmed" | "Date Pending" | "Needs Review" | "Canceled" | "Completed";
 export type EventType = "Regatta" | "Fleet race" | "Head race" | "Distance race" | "Championship" | "Paddle race" | "Powerboat race" | "Race series";
@@ -53,7 +54,7 @@ const oklahoma: RaceEvent[] = [
  {slug:"riversport-rowing-league-2027",name:"RIVERSPORT Rowing League — 2027 Spring Season",sports:["Rowing"],eventTypes:["Race series"],startDate:null,city:"Oklahoma City",state:"Oklahoma",waterway:"Oklahoma River",venue:"Boathouse District",organizer:"RIVERSPORT Foundation",audience:["Participant"],officialUrl:"https://www.riversportokc.org/team-sports/rowing/rowing-league/",status:"Date Pending",verifiedAt:"2026-10-11",latitude:35.4647,longitude:-97.4991,summary:"The organizer is inviting interest for the 2027 spring season; competition dates have not yet been announced.",market:"Oklahoma City"}
 ];
 
-export const events=[...ohio,...corridor,...newYork,...oklahoma,...upcomingNational];
+export const events=[...ohio,...corridor,...newYork,...oklahoma,...upcomingNational,...rowingNational];
 export const sportOptions=Array.from(new Set(events.flatMap(e=>e.sports))).sort();
 export const eventTypeOptions=Array.from(new Set(events.flatMap(e=>e.eventTypes||[]))).sort();
 export function normalize(s:string){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
