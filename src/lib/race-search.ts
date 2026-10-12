@@ -37,6 +37,7 @@ const waterways:Record<string,Point[]>={
  "mississippi river":[{lat:44.9778,lon:-93.2650},{lat:44.9537,lon:-93.09},{lat:42.5006,lon:-90.6646},{lat:41.5236,lon:-90.5776},{lat:38.627,lon:-90.1994},{lat:35.1495,lon:-90.049},{lat:32.3526,lon:-90.8779},{lat:30.4515,lon:-91.1871},{lat:29.9511,lon:-90.0715}],
  "ohio river":[{lat:39.1031,lon:-84.512},{lat:38.7359,lon:-85.3799},{lat:38.2527,lon:-85.7585},{lat:37.9716,lon:-87.5711},{lat:37.0834,lon:-88.6}],
  "kentucky lake":[{lat:36.972,lon:-88.257}],"lake of the ozarks":[{lat:38.1986,lon:-92.6388}],"missouri river":[{lat:38.627,lon:-90.1994}],"long island sound":[{lat:40.9248,lon:-73.7518}],"oklahoma river":[{lat:35.4647,lon:-97.4991}]
+ ,"hudson river":[{lat:42.6526,lon:-73.7562},{lat:41.7004,lon:-73.921},{lat:40.7128,lon:-74.006}],"lake michigan":[{lat:41.8781,lon:-87.6298},{lat:43.0389,lon:-87.9065}],"chesapeake bay":[{lat:38.9784,lon:-76.4922}]
 };
 const disciplines:[string,string[]][]=[
  ["Sailing",["sailing","sailboat","yacht"]],["Regatta",["regatta","regattas"]],["Rowing",["rowing","crew","sculling"]],
