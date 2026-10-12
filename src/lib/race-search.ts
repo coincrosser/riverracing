@@ -1,9 +1,10 @@
 import type {RaceEvent} from "@/data/events";
 
 export type RadiusMiles=25|50|100|250;
-export type SearchInterpretation={query:string;location?:string;locationKind?:"city"|"state"|"zip"|"waterway"|"region";discipline?:string;dateRange?:{start:string;end:string};radius:RadiusMiles;freeText?:string;usedAI?:boolean};
+export type SearchIntent="DISCIPLINE"|"EVENT_TYPE"|"WATERWAY"|"STATE"|"LOCATION"|"DATE"|"EVENT_OR_ORGANIZER";
+export type SearchInterpretation={query:string;intent:SearchIntent[];location?:string;locationKind?:"city"|"state"|"zip"|"waterway"|"region";discipline?:string;dateRange?:{start:string;end:string};radius:RadiusMiles;freeText?:string;usedAI?:boolean};
 export type SearchHit={event:RaceEvent;distanceMiles?:number;match:"exact"|"nearby"};
-export type SearchResponse={interpretation:SearchInterpretation;exact:SearchHit[];nearby:SearchHit[];message?:string};
+export type SearchResponse={interpretation:SearchInterpretation;exact:SearchHit[];nearby:SearchHit[];historical:SearchHit[];message?:string};
 
 type Point={lat:number;lon:number};
 type Place=Point&{name:string;kind:"city"|"state"|"zip"|"region";aliases?:string[]};
@@ -39,7 +40,8 @@ const waterways:Record<string,Point[]>={
 };
 const disciplines:[string,string[]][]=[
  ["Sailing",["sailing","sailboat","yacht"]],["Regatta",["regatta","regattas"]],["Rowing",["rowing","crew","sculling"]],
- ["Powerboat racing",["powerboat","power boat","motorboat","motor boat","hydroplane","offshore","outboard","inboard"]],
+ ["Hydroplane racing",["hydroplane"]],["Powerboat racing",["powerboat","power boat","motorboat","motor boat","offshore","outboard","inboard"]],
+ ["Paddling",["paddling","paddle racing"]],
  ["Kayak racing",["kayak","surfski"]],["Canoe racing",["canoe"]],["Dragon boat racing",["dragon boat"]],
  ["Stand-up paddleboard racing",["paddleboard","paddle board","sup"]],["Steamboat racing",["steamboat","riverboat"]]
 ];
@@ -52,25 +54,30 @@ function eventPoint(event:RaceEvent):Point|undefined{if(event.latitude!=null&&ev
 function weekend(now:Date){const day=now.getUTCDay();const untilSaturday=(6-day+7)%7;const sat=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+untilSaturday));const sun=new Date(sat);sun.setUTCDate(sat.getUTCDate()+1);return{start:sat.toISOString().slice(0,10),end:sun.toISOString().slice(0,10)}}
 
 export function interpretSearch(query:string,radius:RadiusMiles=100,now=new Date()):SearchInterpretation{
- const q=clean(query);const result:SearchInterpretation={query,radius};let matchedPlace:Place|undefined;
+ const q=clean(query);const result:SearchInterpretation={query,radius,intent:[]};let matchedPlace:Place|undefined;
  const waterway=Object.keys(waterways).sort((a,b)=>b.length-a.length).find(w=>q.includes(clean(w)));
  if(waterway){result.location=waterway.replace(/\b\w/g,c=>c.toUpperCase());result.locationKind="waterway"}
  if(!waterway){matchedPlace=places.find(p=>(p.aliases||[]).some(a=>q.includes(clean(a))));if(matchedPlace){result.location=matchedPlace.name;result.locationKind=/^\d{5}$/.test(q)?"zip":matchedPlace.kind}}
  if(!result.location){const state=stateNames.find(([name,abbr])=>q.includes(name)||new RegExp(`(^| )${abbr.toLowerCase()}( |$)`).test(q));if(state){result.location=state[0].replace(/\b\w/g,c=>c.toUpperCase());result.locationKind="state"}}
  const discipline=disciplines.find(([,aliases])=>aliases.some(a=>q.includes(clean(a))));if(discipline)result.discipline=discipline[0];
  if(q.includes("this weekend"))result.dateRange=weekend(now);
- const consumed=[...(result.location?[clean(result.location),...(waterway?[waterway]:[]),...((matchedPlace?.aliases)||[])]:[]),...(discipline?discipline[1]:[]),"near","on","in","around","race","races","racing","boat","boats","this","weekend"];
+ if(q.includes("next 7 days")||q.includes("next seven days")){const end=new Date(now);end.setUTCDate(end.getUTCDate()+7);result.dateRange={start:now.toISOString().slice(0,10),end:end.toISOString().slice(0,10)}}
+ if(q.includes("next 30 days")||q.includes("next thirty days")){const end=new Date(now);end.setUTCDate(end.getUTCDate()+30);result.dateRange={start:now.toISOString().slice(0,10),end:end.toISOString().slice(0,10)}}
+ const consumed=[...(result.location?[clean(result.location),...(waterway?[waterway]:[]),...((matchedPlace?.aliases)||[])]:[]),...(discipline?discipline[1]:[]),"near","on","in","around","race","races","racing","boat","boats","this","weekend","next","7","seven","30","thirty","days"];
  let free=` ${q} `;for(const word of consumed.sort((a,b)=>b.length-a.length))free=free.replaceAll(` ${clean(word)} `," ");free=free.trim();if(free)result.freeText=free;
+ if(result.discipline)result.intent.push(result.discipline==="Regatta"?"EVENT_TYPE":"DISCIPLINE");
+ if(result.locationKind==="waterway")result.intent.push("WATERWAY");else if(result.locationKind==="state")result.intent.push("STATE");else if(result.location)result.intent.push("LOCATION");
+ if(result.dateRange)result.intent.push("DATE");if(result.freeText)result.intent.push("EVENT_OR_ORGANIZER");
  return result;
 }
 
-function sportMatches(event:RaceEvent,wanted?:string){if(!wanted)return true;if(wanted==="Regatta")return event.eventTypes?.includes("Regatta")===true;if(wanted==="Powerboat racing")return event.sports.some(s=>/powerboat|hydroplane|steamboat/i.test(s));return event.sports.includes(wanted)}
+function sportMatches(event:RaceEvent,wanted?:string){if(!wanted)return true;if(wanted==="Regatta")return event.eventTypes?.includes("Regatta")===true;if(wanted==="Powerboat racing")return event.sports.some(s=>/powerboat|hydroplane|steamboat/i.test(s));if(wanted==="Paddling")return event.sports.some(s=>/kayak|canoe|paddleboard/i.test(s));return event.sports.includes(wanted)}
 function chronological(a:SearchHit,b:SearchHit){const aPast=a.event.status==="Completed",bPast=b.event.status==="Completed";if(aPast!==bPast)return aPast?1:-1;if(!a.event.startDate)return 1;if(!b.event.startDate)return-1;return a.event.startDate.localeCompare(b.event.startDate)}
 function locationPoint(i:SearchInterpretation){if(!i.location)return;const key=clean(i.location);if(i.locationKind==="waterway")return waterways[key];const place=places.find(p=>clean(p.name)===key||(p.aliases||[]).some(a=>key.includes(clean(a))));return place?[{lat:place.lat,lon:place.lon}]:undefined}
 function eventDistance(event:RaceEvent,points:Point[]){const point=eventPoint(event);if(!point)return;return Math.min(...points.map(p=>miles(point,p)))}
 
 export function searchRaces(all:RaceEvent[],interpretation:SearchInterpretation):SearchResponse{
- const exact:SearchHit[]=[],nearby:SearchHit[]=[];const points=locationPoint(interpretation);
+ const exact:SearchHit[]=[],nearby:SearchHit[]=[],historical:SearchHit[]=[];const points=locationPoint(interpretation);
  for(const event of all){
   if(!sportMatches(event,interpretation.discipline))continue;
   if(interpretation.dateRange){const end=event.endDate||event.startDate;if(!event.startDate||!end||event.startDate>interpretation.dateRange.end||end<interpretation.dateRange.start)continue}
@@ -79,10 +86,10 @@ export function searchRaces(all:RaceEvent[],interpretation:SearchInterpretation)
   if(interpretation.locationKind==="waterway")isExact=clean(event.waterway)===clean(interpretation.location||"");
   else if(interpretation.locationKind==="state")isExact=sameState(event.state,interpretation.location||"");
   else if(interpretation.location){const target=cityKey(interpretation.location.split(",")[0]);isExact=cityKey(event.city)===target||clean(event.county||"")===target||clean(event.region||"")===target}
-  if(isExact){exact.push({event,match:"exact"});continue}
-  if(points&&interpretation.locationKind!=="state"){const distance=eventDistance(event,points);if(distance!=null&&distance<=interpretation.radius)nearby.push({event,match:"nearby",distanceMiles:Math.round(distance)})}
+  if(isExact){const hit:SearchHit={event,match:"exact"};if(event.status==="Completed")historical.push(hit);else exact.push(hit);continue}
+  if(points&&interpretation.locationKind!=="state"){const distance=eventDistance(event,points);if(distance!=null&&distance<=interpretation.radius){const hit:SearchHit={event,match:"nearby",distanceMiles:Math.round(distance)};if(event.status==="Completed")historical.push(hit);else nearby.push(hit)}}
  }
- exact.sort(chronological);nearby.sort((a,b)=>(a.distanceMiles??9999)-(b.distanceMiles??9999)||chronological(a,b));
+ exact.sort(chronological);nearby.sort((a,b)=>(a.distanceMiles??9999)-(b.distanceMiles??9999)||chronological(a,b));historical.sort((a,b)=>(b.event.startDate||"").localeCompare(a.event.startDate||""));
  const message=interpretation.locationKind==="waterway"&&!exact.length?`No verified races are currently listed on the ${interpretation.location}. Nearby races are shown separately.`:undefined;
- return{interpretation,exact,nearby,message};
+ return{interpretation,exact,nearby,historical,message};
 }
