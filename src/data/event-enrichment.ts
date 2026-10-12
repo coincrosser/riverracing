@@ -1,0 +1,34 @@
+export type AudienceIntent="participant"|"spectator";
+export type OfficialLinkType="registration"|"notice_of_race"|"sailing_instructions"|"schedule"|"results"|"rules"|"official_event";
+export type ResourceType="hotel"|"campground"|"rv"|"marina"|"launch"|"trailer_storage"|"dry_storage"|"mooring"|"hoist"|"fuel"|"marine_service"|"restaurant"|"transportation"|"parking"|"spectator_location"|"marine_supply";
+export type Relationship="free"|"affiliate"|"direct_referral"|"cpc"|"cpa"|"commission"|"sponsor";
+
+export type OfficialLink={id:string;type:OfficialLinkType;label:string;url:string;sourceUrl:string;verifiedAt:string};
+export type EventResource={id:string;eventSlug:string;name:string;type:ResourceType;description:string;address?:string;latitude?:number;longitude?:number;websiteUrl:string;bookingUrl?:string;phone?:string;amenities?:string[];sourceUrl:string;verifiedAt:string;relationship:Relationship;disclosureRequired:boolean;usefulFor:AudienceIntent[];applicableDisciplines?:string[]};
+export type EventEnrichment={eventSlug:string;venue:{name:string;address:string;waterway:string;latitude:number;longitude:number;sourceUrl:string};hero:{shortDescription:string;countdownEnabled:boolean};officialLinks:OfficialLink[];resources:EventResource[];spectatorNotes:string[];participantNotes:string[];transportationNotes:string[];lastReviewedAt:string};
+
+const eventSlug="helly-hansen-sailing-world-regatta-series-st-petersburg-2027-st-petersburg";
+const verifiedAt="2026-10-12";
+
+export const eventEnrichments:EventEnrichment[]=[{
+ eventSlug,
+ venue:{name:"St. Petersburg Sailing Center",address:"250 2nd Avenue SE, St. Petersburg, FL 33701",waterway:"Tampa Bay",latitude:27.7694828,longitude:-82.6314411,sourceUrl:"https://www.spyc.org/Waterfront"},
+ hero:{shortDescription:"Three days of one-design, handicap and offshore sailing hosted on the downtown St. Petersburg waterfront.",countdownEnabled:true},
+ officialLinks:[
+  {id:"swrs-st-pete-official",type:"official_event",label:"Official event page",url:"https://www.sailingworld.com/helly-hansen-regatta-series-st-petersburg-2027/",sourceUrl:"https://www.sailingworld.com/helly-hansen-regatta-series-st-petersburg-2027/",verifiedAt}
+ ],
+ participantNotes:["The organizer has not yet published 2027 launching, dockage or trailer instructions. Confirm assignments with the official event page before arrival.","St. Petersburg Yacht Club operates the downtown marina and Sailing Center; event-specific access is controlled by the organizer."],
+ spectatorNotes:[],
+ transportationNotes:["Downtown parking and transit conditions can change during waterfront events. Confirm current restrictions before leaving for the venue."],
+ resources:[
+  {id:"swrs-ac-hotel",eventSlug,name:"AC Hotel St. Petersburg Downtown",type:"hotel",description:"The hotel linked by the 2027 organizer page, in downtown St. Petersburg.",address:"110 2nd Street North, St. Petersburg, FL 33701",latitude:27.772288,longitude:-82.6356211,websiteUrl:"https://www.marriott.com/en-us/hotels/tpapa-ac-hotel-st-petersburg-downtown/overview/",bookingUrl:"https://www.marriott.com/en-us/hotels/tpapa-ac-hotel-st-petersburg-downtown/overview/",phone:"727-864-0001",sourceUrl:"https://www.sailingworld.com/helly-hansen-regatta-series-st-petersburg-2027/",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant","spectator"]},
+  {id:"swrs-spyc-waterfront",eventSlug,name:"St. Petersburg Yacht Club Waterfront",type:"marina",description:"Host-club waterfront information for the Downtown Marina and Sailing Center. Contact the club for event-specific access.",address:"50 Bayshore Drive, St. Petersburg, FL 33701",websiteUrl:"https://www.spyc.org/Waterfront",phone:"727-822-3227",amenities:["Downtown marina","Sailing Center","Marina office"],sourceUrl:"https://www.spyc.org/Waterfront",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant"],applicableDisciplines:["Sailing"]},
+  {id:"swrs-harborage",eventSlug,name:"Harborage Marina",type:"marina",description:"Full-service marina south of downtown with transient dockage, wet slips, dry storage and fuel. Availability is not implied; contact the marina directly.",address:"1110 3rd Street S, St. Petersburg, FL 33701",latitude:27.7591987,longitude:-82.6362556,websiteUrl:"https://waterviewmarinas.com/harborage-marina-florida",phone:"727-821-6347",amenities:["Transient dockage","Fuel dock","Wet slips","Dry storage","Trailer storage","Pumpout"],sourceUrl:"https://waterviewmarinas.com/harborage-marina-florida",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant"],applicableDisciplines:["Sailing"]},
+  {id:"swrs-embree",eventSlug,name:"Embree Marine Service",type:"marine_service",description:"Local boatyard listing sailboat rigging, diesel, electrical, fiberglass and haul-out services.",address:"201 16th Avenue S, St. Petersburg, FL 33701",latitude:27.754368,longitude:-82.635509,websiteUrl:"https://www.embreemarine.com/services",phone:"727-896-0671",amenities:["Sailboat rigging","Diesel mechanics","Electrical repair","Fiberglass repair","Haul-out"],sourceUrl:"https://www.embreemarine.com/services",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant"],applicableDisciplines:["Sailing"]},
+  {id:"swrs-west-marine",eventSlug,name:"West Marine St. Petersburg",type:"marine_supply",description:"Marine-supply store carrying sailing hardware, line, safety equipment and boat-maintenance supplies.",address:"2010 Tyrone Boulevard N, St. Petersburg, FL 33710",latitude:27.7898239,longitude:-82.7250741,websiteUrl:"https://www.westmarine.com/stores/st-petersburg-fl-1289/",phone:"727-342-8001",amenities:["Rigging hardware","Line","Safety equipment","Marine electronics"],sourceUrl:"https://www.westmarine.com/stores/st-petersburg-fl-1289/",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant"],applicableDisciplines:["Sailing"]},
+  {id:"swrs-sunrunner",eventSlug,name:"PSTA SunRunner",type:"transportation",description:"Frequent public transit connecting downtown St. Petersburg, Central Avenue and St. Pete Beach.",websiteUrl:"https://psta.net/services/sunrunner/",amenities:["Accessible stations","Downtown service","Beach service"],sourceUrl:"https://psta.net/services/sunrunner/",verifiedAt,relationship:"free",disclosureRequired:false,usefulFor:["participant","spectator"]}
+ ],lastReviewedAt:verifiedAt
+}];
+
+export function getEventEnrichment(slug:string){return eventEnrichments.find(item=>item.eventSlug===slug)}
+export function getOutboundLink(id:string){for(const enrichment of eventEnrichments){const official=enrichment.officialLinks.find(link=>link.id===id);if(official)return{eventSlug:enrichment.eventSlug,type:official.type,url:official.url};const resource=enrichment.resources.find(item=>item.id===id);if(resource)return{eventSlug:enrichment.eventSlug,type:resource.type,url:resource.bookingUrl||resource.websiteUrl}}}

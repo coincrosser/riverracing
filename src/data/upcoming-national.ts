@@ -531,7 +531,7 @@ const rawUpcoming:RawUpcoming[]=[
     "state": "FL",
     "organizer": "St. Petersburg Yacht Club / Sailing World",
     "discipline": "Sailing",
-    "url": "https://www.sailingworld.com/regatta-series/"
+    "url": "https://www.sailingworld.com/helly-hansen-regatta-series-st-petersburg-2027/"
   },
   {
     "name": "Sunfish Florida Regional Championship I",
