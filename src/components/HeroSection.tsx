@@ -14,8 +14,8 @@ export default function HeroSection({eventCount,loading,query,onQueryChange,onSe
  return <section className="hero home-hero">
   <div className="hero-grid"/>
   <div className="hero-copy">
-   <p className="kicker">THE INDEPENDENT WATER SPORTS INDEX</p>
-   <h1>EVERY RIVER. <em>EVERY RACE.</em> EVERY CLEANUP.</h1>
+   <p className="hero-badge">⚡ THE NATIONAL WATER SPORTS &amp; STEWARDSHIP NETWORK</p>
+   <h1>EVERY RIVER. <em>EVERY RACE.</em> <span>EVERY CLEANUP.</span></h1>
    <p className="lead">The independent index for water sports, live USGS hydrology, and America&apos;s premier APA-style Pontoon &amp; Canoe Cleanup League.</p>
    <div className="hero-ctas">
     <Link className="hero-cta primary" href="/stewardship/league">JOIN THE CLEANUP LEAGUE <span>→</span></Link>

@@ -10,7 +10,7 @@ const telemetry=read("../src/components/WaterTelemetry.tsx");
 const operator=read("../src/components/OperatorPortal.tsx");
 
 test("homepage flagship CTAs route to league, live index, and territory claim",()=>{
- assert.match(hero,/EVERY RIVER\. <em>EVERY RACE\.<\/em> EVERY CLEANUP\./);
+ assert.match(hero,/EVERY RIVER\. <em>EVERY RACE\.<\/em> <span>EVERY CLEANUP\.<\/span>/);
  assert.match(hero,/href="\/stewardship\/league"/);
  assert.match(hero,/href="#live-index"/);
  assert.match(hero,/href="\/territories\/claim"/);
