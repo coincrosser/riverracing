@@ -1,3 +1,4 @@
+import {events,type RaceEvent} from "./events";
 export type AudienceIntent="participant"|"spectator"|"stewardship";
 export type OfficialLinkType="registration"|"notice_of_race"|"sailing_instructions"|"schedule"|"results"|"rules"|"official_event";
 export type ResourceType="hotel"|"campground"|"rv"|"marina"|"launch"|"trailer_storage"|"dry_storage"|"mooring"|"hoist"|"fuel"|"marine_service"|"restaurant"|"transportation"|"parking"|"spectator_location"|"marine_supply";
@@ -5,7 +6,7 @@ export type Relationship="free"|"affiliate"|"direct_referral"|"cpc"|"cpa"|"commi
 
 export type OfficialLink={id:string;type:OfficialLinkType;label:string;url:string;sourceUrl:string;verifiedAt:string};
 export type EventResource={id:string;eventSlug:string;name:string;type:ResourceType;description:string;address?:string;latitude?:number;longitude?:number;websiteUrl:string;bookingUrl?:string;phone?:string;amenities?:string[];sourceUrl:string;verifiedAt:string;relationship:Relationship;disclosureRequired:boolean;usefulFor:AudienceIntent[];applicableDisciplines?:string[]};
-export type EventEnrichment={eventSlug:string;venue:{name:string;address:string;waterway:string;latitude:number;longitude:number;sourceUrl:string};hero:{shortDescription:string;countdownEnabled:boolean};officialLinks:OfficialLink[];resources:EventResource[];spectatorNotes:string[];participantNotes:string[];transportationNotes:string[];lastReviewedAt:string};
+export type EventEnrichment={eventSlug:string;venue:{name:string;address:string;waterway:string;latitude?:number;longitude?:number;sourceUrl:string};hero:{shortDescription:string;countdownEnabled:boolean};officialLinks:OfficialLink[];resources:EventResource[];spectatorNotes:string[];participantNotes:string[];transportationNotes:string[];lastReviewedAt:string};
 
 const eventSlug="helly-hansen-sailing-world-regatta-series-st-petersburg-2027-st-petersburg";
 const verifiedAt="2026-10-12";
@@ -55,5 +56,6 @@ export const eventEnrichments:EventEnrichment[]=[{
  }
 ];
 
-export function getEventEnrichment(slug:string){return eventEnrichments.find(item=>item.eventSlug===slug)}
-export function getOutboundLink(id:string){for(const enrichment of eventEnrichments){const official=enrichment.officialLinks.find(link=>link.id===id);if(official)return{eventSlug:enrichment.eventSlug,type:official.type,url:official.url};const resource=enrichment.resources.find(item=>item.id===id);if(resource)return{eventSlug:enrichment.eventSlug,type:resource.type,url:resource.bookingUrl||resource.websiteUrl}}}
+export function buildBaseEventEnrichment(event:RaceEvent):EventEnrichment{return{eventSlug:event.slug,venue:{name:event.venue||`${event.city}, ${event.state}`,address:[event.venue,event.city,event.state].filter(Boolean).join(", "),waterway:event.waterway,latitude:event.latitude,longitude:event.longitude,sourceUrl:event.officialUrl},hero:{shortDescription:event.summary,countdownEnabled:Boolean(event.startDate&&event.status!=="Completed")},officialLinks:[...(event.registrationUrl?[{id:`${event.slug}-registration`,type:"registration" as const,label:"Register",url:event.registrationUrl,sourceUrl:event.registrationUrl,verifiedAt:event.verifiedAt}]:[]),{id:`${event.slug}-official`,type:"official_event",label:"Official event page",url:event.officialUrl,sourceUrl:event.officialUrl,verifiedAt:event.verifiedAt}],resources:[],spectatorNotes:[],participantNotes:[],transportationNotes:[],lastReviewedAt:event.verifiedAt}}
+export function getEventEnrichment(slug:string){const event=events.find(item=>item.slug===slug);return eventEnrichments.find(item=>item.eventSlug===slug)||(event?buildBaseEventEnrichment(event):undefined)}
+export function getOutboundLink(id:string){for(const enrichment of eventEnrichments){const official=enrichment.officialLinks.find(link=>link.id===id);if(official)return{eventSlug:enrichment.eventSlug,type:official.type,url:official.url};const resource=enrichment.resources.find(item=>item.id===id);if(resource)return{eventSlug:enrichment.eventSlug,type:resource.type,url:resource.bookingUrl||resource.websiteUrl}}for(const event of events){if(id===`${event.slug}-registration`&&event.registrationUrl)return{eventSlug:event.slug,type:"registration",url:event.registrationUrl};if(id===`${event.slug}-official`)return{eventSlug:event.slug,type:"official_event",url:event.officialUrl}}}

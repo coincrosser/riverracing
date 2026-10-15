@@ -7,6 +7,7 @@ const guide=fs.readFileSync(new URL("../src/components/EventWeekendGuide.tsx",im
 const outbound=fs.readFileSync(new URL("../src/app/out/[linkId]/route.ts",import.meta.url),"utf8");
 const eventPage=fs.readFileSync(new URL("../src/app/events/[slug]/page.tsx",import.meta.url),"utf8");
 const disciplineResources=fs.readFileSync(new URL("../src/data/discipline-resources.ts",import.meta.url),"utf8");
+const leaderboard=fs.readFileSync(new URL("../src/components/LeagueLeaderboard.tsx",import.meta.url),"utf8");
 
 test("prototype uses additive enrichment and ordinary free relationships",()=>{
  assert.match(enrichment,/EventEnrichment/);
@@ -20,6 +21,15 @@ test("audience mode prioritizes participant and spectator experiences",()=>{
  assert.match(guide,/I’M WATCHING/);
  assert.match(guide,/audience==="participant"/);
  assert.match(guide,/if\(!p\.items\.length/);
+});
+
+test("every event receives the reusable three-mode guide shell",()=>{
+ assert.match(enrichment,/buildBaseEventEnrichment/);
+ assert.match(enrichment,/event\.registrationUrl/);
+ assert.match(eventPage,/EventWeekendGuide event=\{e\} enrichment=\{enrichment!\} asOfDate=\{asOfDate\}/);
+ assert.doesNotMatch(eventPage,/if\(enrichment\)return/);
+ assert.match(guide,/CLEANUP LEAGUE/);
+ assert.match(leaderboard,/Waterway \/ County/);
 });
 
 test("outbound links are allowlisted, classified, and analytics-ready",()=>{
