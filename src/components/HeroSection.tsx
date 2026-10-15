@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EsquifHeritageBanner from "@/components/EsquifHeritageBanner";
 
 type HeroSectionProps = {
   eventCount: number;
@@ -27,6 +28,7 @@ export default function HeroSection({eventCount,loading,query,onQueryChange,onSe
     <span>Become a River League Operator &amp; Home Marina Partner.</span>
     <Link href="/territories/claim">Claim Your Territory →</Link>
    </aside>
+   <EsquifHeritageBanner compact/>
    <form className="search hero-search" onSubmit={onSearch}>
     <label><span>SEARCH THE LIVE INDEX</span><input value={query} onChange={event=>onQueryChange(event.target.value)} placeholder="Try “Sailing near Louisville”..." aria-label="Search races and waterways"/></label>
     <button disabled={loading}>{loading?"SEARCHING…":"FIND RACES"} <b>→</b></button>

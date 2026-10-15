@@ -1,10 +1,13 @@
 import {upcomingNational} from "./upcoming-national";
 import {rowingNational} from "./rowing-national";
 import {coverageBalanceEvents} from "./coverage-balance";
+import {quebecWhitewaterEvents} from "./quebec-whitewater";
+import type {VesselClass} from "@/types/league-network";
 
 export type EventStatus = "Confirmed" | "Date Pending" | "Needs Review" | "Canceled" | "Completed";
 export type EventType = "Regatta" | "Fleet race" | "Head race" | "Distance race" | "Championship" | "Paddle race" | "Powerboat race" | "Race series";
-export type RaceEvent = { slug:string; name:string; sports:string[]; eventTypes?:EventType[]; boatClasses?:string[]; startDate:string|null; endDate?:string; time?:string; timezone?:string; city:string; state:string; country?:string; county?:string; region?:string; waterway:string; venue:string; organizer:string; organizerSlug?:string; audience:("Participant"|"Spectator")[]; registrationUrl?:string; officialUrl:string; fee?:string; status:EventStatus; registrationStatus?:string; recurrence?:string; verifiedAt:string; latitude?:number; longitude?:number; coordinatePrecision?:"venue"|"city"; waterwayVerified?:boolean; preRaceSweepSlug?:string; summary:string; market:"Ohio River"|"Oklahoma City"|"New York"|"Kentucky Lake"|"National" };
+export type LocalizedEventMetadata={en:{title:string;summary:string;organizerNote?:string;waterwayDescription?:string};fr:{title:string;summary:string;organizerNote?:string;waterwayDescription?:string}};
+export type RaceEvent = { slug:string; name:string; sports:string[]; eventTypes?:EventType[]; boatClasses?:string[]; vesselClasses?:VesselClass[]; localized?:LocalizedEventMetadata; startDate:string|null; endDate?:string; time?:string; timezone?:string; city:string; state:string; country?:string; county?:string; region?:string; waterway:string; venue:string; organizer:string; organizerSlug?:string; audience:("Participant"|"Spectator")[]; registrationUrl?:string; officialUrl:string; fee?:string; status:EventStatus; registrationStatus?:string; recurrence?:string; verifiedAt:string; latitude?:number; longitude?:number; coordinatePrecision?:"venue"|"city"; waterwayVerified?:boolean; preRaceSweepSlug?:string; summary:string; market:"Ohio River"|"Oklahoma City"|"New York"|"Kentucky Lake"|"National" };
 
 const ohio: RaceEvent[] = [
  {slug:"great-steamboat-race-2027",name:"Great Steamboat Race",sports:["Steamboat racing"],eventTypes:["Powerboat race"],startDate:"2027-04-28",time:"Boarding 4:30–5:30 p.m.; race 6 p.m.",city:"Louisville",state:"Kentucky",waterway:"Ohio River",venue:"Louisville Wharf at Waterfront Park",organizer:"Kentucky Derby Festival",organizerSlug:"kentucky-derby-festival",audience:["Spectator"],officialUrl:"https://discover.kdf.org/great-steamboat-race/",status:"Confirmed",registrationStatus:"Tickets coming soon",recurrence:"Annual",verifiedAt:"2026-10-11",latitude:38.2598,longitude:-85.7426,summary:"The Kentucky Derby Festival’s two-hour riverboat competition returns to the Louisville waterfront in 2027.",market:"Ohio River"},
@@ -55,7 +58,7 @@ const oklahoma: RaceEvent[] = [
  {slug:"riversport-rowing-league-2027",name:"RIVERSPORT Rowing League — 2027 Spring Season",sports:["Rowing"],eventTypes:["Race series"],startDate:null,city:"Oklahoma City",state:"Oklahoma",waterway:"Oklahoma River",venue:"Boathouse District",organizer:"RIVERSPORT Foundation",audience:["Participant"],officialUrl:"https://www.riversportokc.org/team-sports/rowing/rowing-league/",status:"Date Pending",verifiedAt:"2026-10-11",latitude:35.4647,longitude:-97.4991,summary:"The organizer is inviting interest for the 2027 spring season; competition dates have not yet been announced.",market:"Oklahoma City"}
 ];
 
-export const events=[...ohio,...corridor,...newYork,...oklahoma,...upcomingNational,...rowingNational,...coverageBalanceEvents];
+export const events=[...ohio,...corridor,...newYork,...oklahoma,...quebecWhitewaterEvents,...upcomingNational,...rowingNational,...coverageBalanceEvents];
 export const sportOptions=Array.from(new Set(events.flatMap(e=>e.sports))).sort();
 export const eventTypeOptions=Array.from(new Set(events.flatMap(e=>e.eventTypes||[]))).sort();
 export function normalize(s:string){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
