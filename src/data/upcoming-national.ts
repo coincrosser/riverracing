@@ -1103,6 +1103,7 @@ function slugify(value:string){
 
 const seen=new Set<string>();
 export const upcomingNational:RaceEvent[]=rawUpcoming
+  .filter(event=>!(/beer[ -]?can|club night|tuesday night|wednesday night|thursday night|weekly twilight/i.test(event.name)&&!/championship|regatta|distance|invitational|national|regional|offshore|race week|cup/i.test(event.name)))
   .filter(event=>{
     const key=`${event.name.toLowerCase()}|${event.startDate}|${event.city.toLowerCase()}|${event.state.toLowerCase()}`;
     if(seen.has(key))return false;
@@ -1131,7 +1132,7 @@ export const upcomingNational:RaceEvent[]=rawUpcoming
       status:"Confirmed",
       registrationStatus:"See official source",
       verifiedAt:"2026-10-11",
-      summary:`Announced ${event.discipline.toLowerCase()} competition listed by ${event.organizer}.`,
+      summary:`Upcoming ${event.discipline.toLowerCase()} competition announced by ${event.organizer}.`,
       market:"National"
     };
   });

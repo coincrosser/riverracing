@@ -1,0 +1,13 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {hasBannedBoilerplate,isLowQualityCoastalStub} from "../src/lib/quality-gates.ts";
+import {getUsgsTelemetry} from "../src/lib/hydrology/usgs.ts";
+import {allClassStandings,isFranchised,poundsPerCrewMember} from "../src/lib/league.ts";
+import {eventDateLabel} from "../src/lib/date-format.ts";
+import {prizeBreakdown} from "../src/types/companion-event.ts";
+
+test("coastal filter rejects club-night stubs but preserves meaningful regattas",()=>{assert.equal(isLowQualityCoastalStub({eventName:"Tuesday Beer Can Series"}),true);assert.equal(isLowQualityCoastalStub({eventName:"Tuesday Beer Can Regional Regatta"}),false);assert.equal(hasBannedBoilerplate("Announced sailing competition listed by Regatta Network listed organizer"),true)});
+test("single-day events render one clean date",()=>{assert.equal(eventDateLabel("2026-10-24","2026-10-24"),"Oct 24, 2026")});
+test("USGS telemetry parses values and fails closed",async()=>{const ok=await getUsgsTelemetry("1",async()=>new Response(JSON.stringify({value:{timeSeries:[{sourceInfo:{siteName:"Test Gauge"},variable:{variableCode:[{value:"00060"}],unit:{unitCode:"ft3/s"}},values:[{value:[{value:"1234",dateTime:"2026-10-14T12:00:00Z"}]}]}]}}),{status:200}));assert.equal(ok.status,"live");assert.equal(ok.readings[0].value,1234);const failed=await getUsgsTelemetry("1",async()=>{throw new Error("offline")});assert.equal(failed.status,"unavailable");assert.deepEqual(failed.readings,[])});
+test("territory franchise detection requires an active operator and marina",()=>{assert.equal(isFranchised(undefined),false);assert.equal(isFranchised({slug:"x",name:"X",operatorName:"Operator",waterwaySlug:"river",active:true,homeMarinas:[]}),false);assert.equal(isFranchised({slug:"x",name:"X",operatorName:"Operator",waterwaySlug:"river",active:true,homeMarinas:[{name:"Dock",city:"A",state:"B",url:"https://example.com",verifiedAt:"2026-10-14"}]}),true)});
+test("all-class standings use pounds per crew member",()=>{const a={slug:"a",teamName:"Solo",vesselClass:"human_solo",seasonPoints:0,verifiedPoundsRemoved:20,crewSize:1,safetyPledgeStatus:"signed",recordStatus:"verified"},b={...a,slug:"b",teamName:"Crew",verifiedPoundsRemoved:50,crewSize:5};assert.equal(poundsPerCrewMember(a),20);assert.deepEqual(allClassStandings([b,a]).map(x=>x.slug),["a","b"])});
+test("companion sweep purse shares total one hundred percent",()=>{const p=prizeBreakdown(100,10);assert.equal(p.purse,1000);assert.equal(p.firstPlace+p.hullSaverBounty+p.mothershipDuo+p.pokerHand,1000)});

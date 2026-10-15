@@ -1,4 +1,4 @@
-export type AudienceIntent="participant"|"spectator";
+export type AudienceIntent="participant"|"spectator"|"stewardship";
 export type OfficialLinkType="registration"|"notice_of_race"|"sailing_instructions"|"schedule"|"results"|"rules"|"official_event";
 export type ResourceType="hotel"|"campground"|"rv"|"marina"|"launch"|"trailer_storage"|"dry_storage"|"mooring"|"hoist"|"fuel"|"marine_service"|"restaurant"|"transportation"|"parking"|"spectator_location"|"marine_supply";
 export type Relationship="free"|"affiliate"|"direct_referral"|"cpc"|"cpa"|"commission"|"sponsor";
